@@ -12,8 +12,7 @@ def importNotes():
     global listOfNotes
     with open("database.json", "r") as read_file:
         listOfNotes = json.load(read_file)
-    print('listOfNotes:')
-    print(listOfNotes)
+    return listOfNotes
 # Notes to Json
 def exportNotes():
     global listOfNotes

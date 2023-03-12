@@ -55,11 +55,11 @@ def get_text_messages(message):
         iter += 1
         if typeOfFunc == 1: # create note
             if iter == 1:
-                new_note_name = str(message.text)
+                new_note_name = str(message.text).lower()
                 # check matches
                 flag = False
                 for n in range(len(funcF.listOfNotes)):
-                    if new_note_name == funcF.listOfNotes[n]['name']:
+                    if new_note_name == funcF.listOfNotes[n]['name'].lower():
                         flag = True
                 if flag == False:
                     funcF.listOfNotes.append(funcF.notes)
@@ -112,8 +112,23 @@ def get_text_messages(message):
             
                 
         elif typeOfFunc == 4: # delete note
-            delete_note_name = str(message.text)
+            delete_note_name = str(message.text).lower()
             bot.send_message(message.from_user.id, 'Удаляем запись - ' + delete_note_name)
+            flag = False
+            for n in range(len(funcF.listOfNotes)):
+                check_name = funcF.listOfNotes[n]["name"].lower()
+                print(delete_note_name.find(check_name))
+                if delete_note_name.find(check_name) != -1:
+                    flag = True
+                    funcF.listOfNotes.pop(n)
+                    funcF.exportNotes()
+            if flag == True:
+                bot.send_message(message.from_user.id, 'Запись успешно удалена')
+            else:
+                bot.send_message(message.from_user.id, 'Ошибка, такой записи нет')
+            typeOfFunc = 0
+            iter = 0
+            
         elif typeOfFunc == 0:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             btn = types.InlineKeyboardButton("/start")
