@@ -5,7 +5,7 @@ listOfNotes = []
 notes = {
     "name" : '',
     "mail" : '',
-    "numbers" : ''
+    "number" : ''
 }
 # Json to notes
 def importNotes():
