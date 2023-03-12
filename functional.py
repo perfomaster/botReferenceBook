@@ -25,6 +25,7 @@ def get_text_messages(message):
     global typeOfFunc, iter
 
     if message.text == 'Начинаем':
+        funcF.importNotes()
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton('Создать запись')
         btn2 = types.KeyboardButton('Отредактировать запись')
@@ -52,13 +53,24 @@ def get_text_messages(message):
     # Sub functions menu : 
     else :
         iter += 1
-        if typeOfFunc == 1:
+        if typeOfFunc == 1: # create note
             if iter == 1:
                 new_note_name = str(message.text)
-                funcF.listOfNotes.append(funcF.notes)
-                funcF.listOfNotes[len(funcF.listOfNotes) - 1]["name"] = new_note_name
-                bot.send_message(message.from_user.id, 'Имя новой записи - ' + new_note_name)
-                bot.send_message(message.from_user.id, 'Введите почту')
+                # check matches
+                flag = False
+                for n in range(len(funcF.listOfNotes)):
+                    if new_note_name == funcF.listOfNotes[n]['name']:
+                        flag = True
+                if flag == False:
+                    funcF.listOfNotes.append(funcF.notes)
+                    funcF.listOfNotes[len(funcF.listOfNotes) - 1]["name"] = new_note_name
+                    bot.send_message(message.from_user.id, 'Имя новой записи - ' + new_note_name)
+                    bot.send_message(message.from_user.id, 'Введите почту')
+                else:
+                    iter = 0
+                    bot.send_message(message.from_user.id, 'Ошибка, такая запись уже имеется')
+                    bot.send_message(message.from_user.id, 'Введите новое имя')
+                
             elif iter == 2:
                 new_note_mail = str(message.text)
                 funcF.listOfNotes[len(funcF.listOfNotes) - 1]["mail"] = new_note_mail
@@ -66,30 +78,48 @@ def get_text_messages(message):
             elif iter == 3:
                 new_note_number = str(message.text)
                 funcF.listOfNotes[len(funcF.listOfNotes) - 1]["numbers"] = new_note_number
+                print(funcF.listOfNotes[len(funcF.listOfNotes) - 1])
+                funcF.exportNotes()
+                typeOfFunc = 0
+                iter = 0
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 btn = types.InlineKeyboardButton("/start")
                 markup.add(btn)
-                bot.send_message(message.from_user.id, "Новая зпись сохранена", reply_markup=markup)
-                print(funcF.listOfNotes[len(funcF.listOfNotes) - 1])
-                funcF.exportNotes()
-        elif typeOfFunc == 2:
+                bot.send_message(message.from_user.id, "Новая запись сохранена", reply_markup=markup)
+                
+                
+        elif typeOfFunc == 2: # render
             renote_name = str(message.text)
             bot.send_message(message.from_user.id, 'Редактируем запись -' + renote_name)
-        elif typeOfFunc == 3:
-            search_note_name = str(message.text)
+        elif typeOfFunc == 3: # search note and print
+            search_note_name = str(message.text).lower()
             bot.send_message(message.from_user.id, 'Ищем запись по имени - ' + search_note_name)
             flag = False
             for n in range(len(funcF.listOfNotes)):
-                if search_note_name == funcF.listOfNotes[n]["name"]:
-                    print(funcF.listOfNotes[n])
+                check_name = funcF.listOfNotes[n]["name"].lower()
+                if search_note_name.find(check_name) != -1:
+                    bot.send_message(message.from_user.id, 'Запись найдена')
+                    bot.send_message(message.from_user.id, 'Имя - ' + funcF.listOfNotes[n]["name"])
+                    bot.send_message(message.from_user.id, 'Почта - ' + funcF.listOfNotes[n]["mail"])
+                    bot.send_message(message.from_user.id, 'Телефон - ' + funcF.listOfNotes[n]["numbers"])
                     flag = True
             if flag != True:
+                bot.send_message(message.from_user.id, 'Запись не найдена')
                 print('Запись не найдена')
+            bot.send_message(message.from_user.id, 'Что еще требуется сделать?')
+            typeOfFunc = 0
+            iter = 0
+            
                 
-        elif typeOfFunc == 4:
+        elif typeOfFunc == 4: # delete note
             delete_note_name = str(message.text)
             bot.send_message(message.from_user.id, 'Удаляем запись - ' + delete_note_name)
-        
+        elif typeOfFunc == 0:
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            btn = types.InlineKeyboardButton("/start")
+            markup.add(btn)
+            bot.send_message(message.from_user.id, "Ошибка, начать заново", reply_markup=markup)
+            
     
                          
 def poll():
